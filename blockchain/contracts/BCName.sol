@@ -13,6 +13,7 @@ contract BCName is Initializable {
   struct AddressNames {
     uint256 length;
     mapping(string => bool) names;
+    string[] allNamesEver;
   }
 
   constructor() payable {}
@@ -37,6 +38,7 @@ contract BCName is Initializable {
     names[name] = msg.sender;
     addressNames[msg.sender].length++;
     addressNames[msg.sender].names[name] = true;
+    addressNames[msg.sender].allNamesEver.push(name);
 
     totalNames++;
   }
@@ -79,6 +81,19 @@ contract BCName is Initializable {
     addressNames[msg.sender].names[name] = true;
   }
 
+  function getOwner(string memory name)
+  public view
+  returns(address)
+  {
+    return names[name];
+  }
+
+  function getAllNamesEver(address addr)
+  public view
+  returns(string[] memory)
+  {
+    return addressNames[addr].allNamesEver;
+  }
 
   function withdraw(uint256 amount)
   public payable
