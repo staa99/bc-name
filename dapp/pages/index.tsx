@@ -1,7 +1,7 @@
 import { Container, Text, VStack } from '@chakra-ui/react'
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
-import SearchBox from '../src/components/searchbox'
+import SearchBox from '../src/components/SearchBox'
 
 const Home: NextPage = () => {
   const router = useRouter()
