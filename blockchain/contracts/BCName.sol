@@ -86,7 +86,7 @@ contract BCName is Initializable {
     require(msg.sender == owner, 'Permission denied to withdraw');
     require(address(this).balance >= amount, 'Contract balance too low');
 
-    (bool sent,) = msg.sender.call{value : amountToTransfer}('');
+    (bool sent,) = msg.sender.call{value : amount}('');
     require(sent, 'Failed to withdraw money from contract');
   }
 }
