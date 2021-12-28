@@ -569,3 +569,6 @@ ENV/
 testeth
 .idea
 bin_output
+
+# openzeppelin upgrades local networks
+**/.openzeppelin/unknown-*.json
