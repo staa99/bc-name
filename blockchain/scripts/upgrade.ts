@@ -16,7 +16,7 @@ async function main() {
 
   await contract.deployed()
 
-  console.log('Proxy deployed to:', contract.address)
+  console.log('Proxy upgraded at:', contract.address)
 }
 
 // We recommend this pattern to be able to use async/await everywhere
