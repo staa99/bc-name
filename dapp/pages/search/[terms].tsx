@@ -6,6 +6,8 @@ import { ethers } from 'ethers'
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+import GetNameCard from '../../src/components/GetNameCard'
+import SearchResultCard from '../../src/components/SearchResultCard'
 import { zeroAddress } from '../../src/utils/address_utils'
 import { AccountNotLinkedError, BCNameError } from '../../src/utils/errors'
 
@@ -126,10 +128,17 @@ const Search: NextPage = () => {
           size={'lg'}
           placeholder={'Search names or addresses'}
         />
-        {searchResult?.address !== zeroAddress ? (
-          <Text>Name is in use</Text>
+        {searchResult && searchResult?.address !== zeroAddress ? (
+          <SearchResultCard
+            searchResult={searchResult}
+            selectedAddress={selectedAddress}
+          />
         ) : searchResult ? (
-          <Text>Name is available</Text>
+          <GetNameCard
+            name={terms as string}
+            price={0}
+            linkName={() => Promise.resolve()}
+          />
         ) : error ? (
           <Text>{error.message}</Text>
         ) : loading ? (
