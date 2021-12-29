@@ -29,8 +29,6 @@ describe('BCName', () => {
     ;[owner, nonOwner1, nonOwner2] = await ethers.getSigners()
   })
 
-  console.log('Found Signers')
-
   describe('register', () => {
     before(async () => {
       contract = (await initContract()).connect(nonOwner1)
