@@ -117,14 +117,14 @@ contract BCName is Initializable {
 
   function getOwner(string memory name)
   public view
-  returns(address)
+  returns (address)
   {
     return names[name];
   }
 
   function getAllNamesEver(address addr)
   public view
-  returns(string[] memory)
+  returns (string[] memory)
   {
     return addressNames[addr].allNamesEver;
   }
