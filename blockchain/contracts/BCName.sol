@@ -115,6 +115,13 @@ contract BCName is Initializable {
     return priceUnit;
   }
 
+  function getTransferOwner(string memory name)
+  public view
+  returns (address)
+  {
+    return transfers[name];
+  }
+
   function getOwner(string memory name)
   public view
   returns (address)
