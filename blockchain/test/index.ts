@@ -19,19 +19,19 @@ describe('BCName', () => {
   let bcName1: string,
     bcName2: string,
     owner: SignerWithAddress,
-    nonOwner1: SignerWithAddress,
-    nonOwner2: SignerWithAddress,
+    signer1: SignerWithAddress,
+    signer2: SignerWithAddress,
     contract: BCName
 
   before(async () => {
     bcName1 = 'test1'
     bcName2 = 'test2'
-    ;[owner, nonOwner1, nonOwner2] = await ethers.getSigners()
+    ;[owner, signer1, signer2] = await ethers.getSigners()
   })
 
   describe('register', () => {
     before(async () => {
-      contract = (await initContract()).connect(nonOwner1)
+      contract = (await initContract()).connect(signer1)
     })
 
     it('Should set owner when registered', async () => {
@@ -42,8 +42,8 @@ describe('BCName', () => {
       await tx.wait()
 
       // assert
-      const allNamesEver = await contract.getAllNamesEver(nonOwner1.address)
-      expect(await contract.getOwner(bcName1)).to.equal(nonOwner1.address)
+      const allNamesEver = await contract.getAllNamesEver(signer1.address)
+      expect(await contract.getOwner(bcName1)).to.equal(signer1.address)
       expect(allNamesEver.length).to.equal(1)
       expect(allNamesEver[0]).to.equal(bcName1)
     })
@@ -58,14 +58,14 @@ describe('BCName', () => {
       await tx.wait()
 
       // assert
-      expect(await contract.getOwner(bcName1)).to.equal(nonOwner1.address)
+      expect(await contract.getOwner(bcName1)).to.equal(signer1.address)
     })
 
     it('Should fail when name is already mapped to a different address', async () => {
       // arrange
       const tx = await contract.register(bcName1)
       await tx.wait()
-      const contractInNewContext = contract.connect(nonOwner2)
+      const contractInNewContext = contract.connect(signer2)
       let error: Error | null = null
 
       // act
@@ -108,7 +108,7 @@ describe('BCName', () => {
       // act
       try {
         await contract.register(bcName2, {
-          value: ethers.utils.parseEther('0.0001'),
+          value: await contract.getLinkingPrice(bcName2),
         })
       } catch (e) {
         console.error(e)
@@ -116,9 +116,9 @@ describe('BCName', () => {
       }
 
       // assert
-      const allNamesEver = await contract.getAllNamesEver(nonOwner1.address)
-      expect(await contract.getOwner(bcName1)).to.equal(nonOwner1.address)
-      expect(await contract.getOwner(bcName2)).to.equal(nonOwner1.address)
+      const allNamesEver = await contract.getAllNamesEver(signer1.address)
+      expect(await contract.getOwner(bcName1)).to.equal(signer1.address)
+      expect(await contract.getOwner(bcName2)).to.equal(signer1.address)
       expect(allNamesEver.length).to.equal(2)
       expect(allNamesEver[0]).to.equal(bcName1)
       expect(allNamesEver[1]).to.equal(bcName2)
@@ -127,7 +127,7 @@ describe('BCName', () => {
 
   describe('release', () => {
     before(async () => {
-      contract = (await initContract()).connect(nonOwner1)
+      contract = (await initContract()).connect(signer1)
     })
 
     it('Should succeed when releasing an owned name', async () => {
@@ -148,7 +148,7 @@ describe('BCName', () => {
       // arrange
       const tx = await contract.register(bcName1)
       await tx.wait()
-      const contractInNewContext = contract.connect(nonOwner2)
+      const contractInNewContext = contract.connect(signer2)
       let error: Error | null = null
 
       // act
@@ -175,6 +175,89 @@ describe('BCName', () => {
         tx = await contract.release(bcName1)
         await tx.wait()
         await contract.release(bcName1)
+      } catch (e: any) {
+        error = e
+        console.error(e)
+        console.error(JSON.stringify(e))
+      }
+
+      // assert
+      expect(error).to.not.be.null
+    })
+  })
+
+  describe('transfer', () => {
+    before(async () => {
+      contract = (await initContract()).connect(signer1)
+    })
+
+    it('Should succeed when transferring to another address with correct value', async () => {
+      // arrange
+      let tx = await contract.register(bcName1)
+      await tx.wait()
+
+      // act
+      tx = await contract.transfer(bcName1, signer2.address, {
+        value: await contract.getTransferPrice(bcName1),
+      })
+      await tx.wait()
+
+      // assert
+      // still owned by signer original owner until claimed
+      expect(await contract.getOwner(bcName1)).to.equal(signer1.address)
+
+      // available to new owner for claiming
+      expect(await contract.getTransferOwner(bcName1)).to.equal(signer2.address)
+    })
+
+    it('Should fail when trying to transfer unowned name', async () => {
+      // arrange
+      const tx = await contract.register(bcName1)
+      await tx.wait()
+      const contractInNewContext = contract.connect(signer2)
+      let error: Error | null = null
+
+      // act
+      try {
+        await contractInNewContext.transfer(bcName1, signer1.address)
+      } catch (e: any) {
+        error = e
+        console.error(e)
+        console.error(JSON.stringify(e))
+      }
+
+      // assert
+      expect(error).to.not.be.null
+    })
+
+    it('Should fail when trying to transfer to same address', async () => {
+      // arrange
+      const tx = await contract.register(bcName1)
+      await tx.wait()
+      let error: Error | null = null
+
+      // act
+      try {
+        await contract.transfer(bcName1, signer1.address)
+      } catch (e: any) {
+        error = e
+        console.error(e)
+        console.error(JSON.stringify(e))
+      }
+
+      // assert
+      expect(error).to.not.be.null
+    })
+
+    it('Should fail when trying to transfer without sufficient value', async () => {
+      // arrange
+      const tx = await contract.register(bcName1)
+      await tx.wait()
+      let error: Error | null = null
+
+      // act
+      try {
+        await contract.transfer(bcName1, signer2.address)
       } catch (e: any) {
         error = e
         console.error(e)
