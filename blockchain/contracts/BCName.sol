@@ -10,6 +10,11 @@ contract BCName is Initializable {
   mapping(string => address) private transfers;
   mapping(address => AddressNames) private addressNames;
 
+  event NameRegistered(address indexed registrant, string name);
+  event NameReleased(address indexed registrant, string name);
+  event NameTransferInitiated(address indexed from, address indexed to, string name);
+  event NameTransferCompleted(address indexed from, address indexed to, string name);
+
   struct AddressNames {
     uint256 length;
     mapping(string => bool) names;
@@ -41,6 +46,8 @@ contract BCName is Initializable {
     addressNames[msg.sender].allNamesEver.push(name);
 
     totalNames++;
+
+    emit NameRegistered(msg.sender, name);
   }
 
   function release(string memory name)
@@ -54,6 +61,8 @@ contract BCName is Initializable {
     addressNames[msg.sender].length--;
     addressNames[msg.sender].names[name] = false;
     totalNames--;
+
+    emit NameReleased(msg.sender, name);
   }
 
   function transfer(string memory name, address recipient)
@@ -63,6 +72,7 @@ contract BCName is Initializable {
     require(msg.value >= priceUnit, 'Transfer fees must be added');
 
     transfers[name] = recipient;
+    emit NameTransferInitiated(msg.sender, recipient, name);
   }
 
   function claim(string memory name)
@@ -79,6 +89,30 @@ contract BCName is Initializable {
     names[name] = msg.sender;
     addressNames[msg.sender].length++;
     addressNames[msg.sender].names[name] = true;
+
+    emit NameTransferCompleted(originalOwner, msg.sender, name);
+  }
+
+  function getLinkingPrice(string memory name)
+  public view
+  returns (uint256)
+  {
+    // validation
+    if (names[name] == msg.sender) {
+      return 0;
+    }
+
+    require(names[name] == address(0), 'Name is already mapped to another address');
+    return priceUnit * addressNames[msg.sender].length;
+  }
+
+  function getTransferPrice(string memory name)
+  public view
+  returns (uint256)
+  {
+    // validation
+    require(names[name] == msg.sender, 'Invalid attempt to transfer unowned name');
+    return priceUnit;
   }
 
   function getOwner(string memory name)
