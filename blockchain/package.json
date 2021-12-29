@@ -35,5 +35,8 @@
   },
   "dependencies": {
     "@openzeppelin/contracts-upgradeable": "^4.4.1"
+  },
+  "scripts": {
+    "test": "npx hardhat test --network localhost"
   }
 }
