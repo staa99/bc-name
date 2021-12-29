@@ -69,6 +69,7 @@ contract BCName is Initializable {
   public payable
   {
     require(names[name] == msg.sender, 'Invalid attempt to transfer unowned name');
+    require(recipient != msg.sender, 'Cannot transfer to same address');
     require(msg.value >= priceUnit, 'Transfer fees must be added');
 
     transfers[name] = recipient;
