@@ -11,7 +11,6 @@ const initContract = async (): Promise<BCName> => {
   await contract.deployed()
   const tx = await contract.initialize()
   await tx.wait()
-  console.log('Test contract deployed to:', (contract as any).address)
   return contract
 }
 
@@ -21,16 +20,17 @@ describe('BCName', () => {
     owner: SignerWithAddress,
     signer1: SignerWithAddress,
     signer2: SignerWithAddress,
+    signer3: SignerWithAddress,
     contract: BCName
 
   before(async () => {
     bcName1 = 'test1'
     bcName2 = 'test2'
-    ;[owner, signer1, signer2] = await ethers.getSigners()
+    ;[owner, signer1, signer2, signer3] = await ethers.getSigners()
   })
 
   describe('register', () => {
-    before(async () => {
+    beforeEach(async () => {
       contract = (await initContract()).connect(signer1)
     })
 
@@ -73,7 +73,6 @@ describe('BCName', () => {
         await contractInNewContext.register(bcName1)
       } catch (e: any) {
         error = e
-        console.error(e)
         console.error(JSON.stringify(e))
       }
 
@@ -92,7 +91,6 @@ describe('BCName', () => {
         await contract.register(bcName2)
       } catch (e: any) {
         error = e
-        console.error(e)
         console.error(JSON.stringify(e))
       }
 
@@ -111,7 +109,6 @@ describe('BCName', () => {
           value: await contract.getLinkingPrice(bcName2),
         })
       } catch (e) {
-        console.error(e)
         console.error(JSON.stringify(e))
       }
 
@@ -126,7 +123,7 @@ describe('BCName', () => {
   })
 
   describe('release', () => {
-    before(async () => {
+    beforeEach(async () => {
       contract = (await initContract()).connect(signer1)
     })
 
@@ -156,7 +153,6 @@ describe('BCName', () => {
         await contractInNewContext.release(bcName1)
       } catch (e: any) {
         error = e
-        console.error(e)
         console.error(JSON.stringify(e))
       }
 
@@ -177,7 +173,6 @@ describe('BCName', () => {
         await contract.release(bcName1)
       } catch (e: any) {
         error = e
-        console.error(e)
         console.error(JSON.stringify(e))
       }
 
@@ -187,7 +182,7 @@ describe('BCName', () => {
   })
 
   describe('transfer', () => {
-    before(async () => {
+    beforeEach(async () => {
       contract = (await initContract()).connect(signer1)
     })
 
@@ -222,7 +217,6 @@ describe('BCName', () => {
         await contractInNewContext.transfer(bcName1, signer1.address)
       } catch (e: any) {
         error = e
-        console.error(e)
         console.error(JSON.stringify(e))
       }
 
@@ -241,7 +235,6 @@ describe('BCName', () => {
         await contract.transfer(bcName1, signer1.address)
       } catch (e: any) {
         error = e
-        console.error(e)
         console.error(JSON.stringify(e))
       }
 
@@ -260,7 +253,57 @@ describe('BCName', () => {
         await contract.transfer(bcName1, signer2.address)
       } catch (e: any) {
         error = e
-        console.error(e)
+        console.error(JSON.stringify(e))
+      }
+
+      // assert
+      expect(error).to.not.be.null
+    })
+  })
+
+  describe('claim', () => {
+    beforeEach(async () => {
+      contract = (await initContract()).connect(signer1)
+    })
+
+    it('Should succeed when claiming a valid transfer', async () => {
+      // arrange
+      let tx = await contract.register(bcName1)
+      await tx.wait()
+      tx = await contract.transfer(bcName1, signer2.address, {
+        value: await contract.getTransferPrice(bcName1),
+      })
+      await tx.wait()
+      const contractAsSigner2 = contract.connect(signer2)
+
+      // act
+      tx = await contractAsSigner2.claim(bcName1)
+      await tx.wait()
+
+      // assert
+      // now owned by claimer
+      expect(await contract.getOwner(bcName1)).to.equal(signer2.address)
+
+      // unavailable for claiming
+      expect(await contract.getTransferOwner(bcName1)).to.equal(zeroAddress)
+    })
+
+    it('Should fail when trying to claim unowned transfer', async () => {
+      // arrange
+      let tx = await contract.register(bcName1)
+      await tx.wait()
+      tx = await contract.transfer(bcName1, signer2.address, {
+        value: await contract.getTransferPrice(bcName1),
+      })
+      await tx.wait()
+      const contractAsSigner3 = contract.connect(signer3)
+      let error: Error | null = null
+
+      // act
+      try {
+        await contractAsSigner3.claim(bcName1)
+      } catch (e: any) {
+        error = e
         console.error(JSON.stringify(e))
       }
 
