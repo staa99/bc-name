@@ -77,6 +77,7 @@ describe('BCName', () => {
       }
 
       // assert
+      // eslint-disable-next-line no-unused-expressions
       expect(error).to.not.be.null
     })
 
@@ -95,6 +96,7 @@ describe('BCName', () => {
       }
 
       // assert
+      // eslint-disable-next-line no-unused-expressions
       expect(error).to.not.be.null
     })
 
@@ -157,6 +159,7 @@ describe('BCName', () => {
       }
 
       // assert
+      // eslint-disable-next-line no-unused-expressions
       expect(error).to.not.be.null
     })
 
@@ -177,6 +180,7 @@ describe('BCName', () => {
       }
 
       // assert
+      // eslint-disable-next-line no-unused-expressions
       expect(error).to.not.be.null
     })
   })
@@ -221,6 +225,7 @@ describe('BCName', () => {
       }
 
       // assert
+      // eslint-disable-next-line no-unused-expressions
       expect(error).to.not.be.null
     })
 
@@ -239,6 +244,7 @@ describe('BCName', () => {
       }
 
       // assert
+      // eslint-disable-next-line no-unused-expressions
       expect(error).to.not.be.null
     })
 
@@ -257,6 +263,7 @@ describe('BCName', () => {
       }
 
       // assert
+      // eslint-disable-next-line no-unused-expressions
       expect(error).to.not.be.null
     })
   })
@@ -308,6 +315,90 @@ describe('BCName', () => {
       }
 
       // assert
+      // eslint-disable-next-line no-unused-expressions
+      expect(error).to.not.be.null
+    })
+  })
+
+  describe('withdraw', () => {
+    beforeEach(async () => {
+      contract = (await initContract()).connect(signer1)
+    })
+
+    it('Should succeed when withdrawing within balance as owner', async () => {
+      // arrange
+      let tx = await contract.register(bcName1)
+      await tx.wait()
+      const linkingPrice = await contract.getLinkingPrice(bcName2)
+      tx = await contract.register(bcName2, {
+        value: linkingPrice,
+      })
+      await tx.wait()
+      const contractAsOwner = contract.connect(owner)
+      const preWithdrawalValue = await owner.getBalance()
+
+      // act
+      tx = await contractAsOwner.withdraw(linkingPrice)
+      const withdrawal = await tx.wait()
+
+      // assert
+      // now owned by claimer
+      const postWithdrawalValue = await owner.getBalance()
+      // the expected value is the sum of the linking price and the value before withdrawal less the gas fees
+      const expectedPostWithdrawalValue = preWithdrawalValue
+        .add(linkingPrice)
+        .sub(withdrawal.cumulativeGasUsed.mul(withdrawal.effectiveGasPrice))
+      expect(postWithdrawalValue.toString()).to.equal(
+        expectedPostWithdrawalValue.toString()
+      )
+    })
+
+    it('Should fail when trying to withdraw as non-admin', async () => {
+      // arrange
+      let tx = await contract.register(bcName1)
+      await tx.wait()
+      const linkingPrice = await contract.getLinkingPrice(bcName2)
+      tx = await contract.register(bcName2, {
+        value: linkingPrice,
+      })
+      await tx.wait()
+      let error: Error | null = null
+
+      // act
+      try {
+        await contract.withdraw(linkingPrice)
+      } catch (e: any) {
+        error = e
+        console.error(JSON.stringify(e))
+      }
+
+      // assert
+      // eslint-disable-next-line no-unused-expressions
+      expect(error).to.not.be.null
+    })
+
+    it('Should fail when trying to withdraw more than balance', async () => {
+      // arrange
+      let tx = await contract.register(bcName1)
+      await tx.wait()
+      const linkingPrice = await contract.getLinkingPrice(bcName2)
+      tx = await contract.register(bcName2, {
+        value: linkingPrice,
+      })
+      await tx.wait()
+      const contractAsOwner = contract.connect(owner)
+      let error: Error | null = null
+
+      // act
+      try {
+        await contractAsOwner.withdraw(linkingPrice.add(1))
+      } catch (e: any) {
+        error = e
+        console.error(JSON.stringify(e))
+      }
+
+      // assert
+      // eslint-disable-next-line no-unused-expressions
       expect(error).to.not.be.null
     })
   })
