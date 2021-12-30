@@ -17,7 +17,6 @@ contract BCName is Initializable {
 
   struct AddressNames {
     uint256 length;
-    mapping(string => bool) names;
     string[] allNamesEver;
   }
 
@@ -37,12 +36,11 @@ contract BCName is Initializable {
       return;
     }
     require(names[name] == address(0), 'Name is already mapped to another address');
-    require(msg.value >= priceUnit * addressNames[msg.sender].length, 'Price requirements must be satisfied');
+    require(msg.value >= getLinkingPrice(name), 'Price requirements must be satisfied');
 
     // set names
     names[name] = msg.sender;
     addressNames[msg.sender].length++;
-    addressNames[msg.sender].names[name] = true;
     addressNames[msg.sender].allNamesEver.push(name);
 
     totalNames++;
@@ -59,7 +57,6 @@ contract BCName is Initializable {
     transfers[name] = address(0);
 
     addressNames[msg.sender].length--;
-    addressNames[msg.sender].names[name] = false;
     totalNames--;
 
     emit NameReleased(msg.sender, name);
@@ -70,7 +67,7 @@ contract BCName is Initializable {
   {
     require(names[name] == msg.sender, 'Invalid attempt to transfer unowned name');
     require(recipient != msg.sender, 'Cannot transfer to same address');
-    require(msg.value >= priceUnit, 'Transfer fees must be added');
+    require(msg.value >= getTransferPrice(name), 'Transfer fees must be added');
 
     transfers[name] = recipient;
     emit NameTransferInitiated(msg.sender, recipient, name);
@@ -84,12 +81,10 @@ contract BCName is Initializable {
     // Reduce the name count of the original owner
     address originalOwner = names[name];
     addressNames[originalOwner].length--;
-    addressNames[originalOwner].names[name] = false;
     transfers[name] = address(0);
 
     names[name] = msg.sender;
     addressNames[msg.sender].length++;
-    addressNames[msg.sender].names[name] = true;
 
     emit NameTransferCompleted(originalOwner, msg.sender, name);
   }
