@@ -4,7 +4,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 contract BCName is Initializable {
   uint256 private priceUnit;
-  address public owner;
+  address private owner;
   uint256 public totalNames;
   mapping(string => address) private names;
   mapping(string => address) private transfers;
