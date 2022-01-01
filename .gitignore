@@ -571,4 +571,4 @@ testeth
 bin_output
 
 # openzeppelin upgrades local networks
-**/.openzeppelin/unknown-*.json
+**/.openzeppelin/unknown-31337.json
