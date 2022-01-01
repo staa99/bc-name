@@ -37,9 +37,9 @@
     "@openzeppelin/contracts-upgradeable": "^4.4.1"
   },
   "scripts": {
-    "test": "npx hardhat test --network localhost",
+    "test": "npx hardhat test",
     "deploy": "npx hardhat run scripts/deploy.ts",
-    "upgrade": "npx hardhat run scripts/upgrade.ts --network localhost",
+    "upgrade": "npx hardhat run scripts/upgrade.ts",
     "lint": "npx eslint '**/*.{js,ts}'",
     "lint-fix": "npx eslint '**/*.{js,ts}' --fix"
   }
