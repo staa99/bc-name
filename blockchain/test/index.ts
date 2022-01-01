@@ -1,6 +1,6 @@
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address'
 import { expect } from 'chai'
-import { ethers } from 'hardhat'
+import { ethers, network } from 'hardhat'
 import { BCName } from '../typechain'
 
 const zeroAddress = '0x0000000000000000000000000000000000000000'
@@ -9,7 +9,16 @@ const initContract = async (): Promise<BCName> => {
   const contractFactory = await ethers.getContractFactory('BCName')
   const contract = (await contractFactory.deploy()) as unknown as BCName
   await contract.deployed()
-  const tx = await contract.initialize()
+
+  const priceUnitEtherKey = `${network.name.toUpperCase()}_NETWORK_PRICE_UNIT_ETHER`
+  const priceUnitEther = process.env[priceUnitEtherKey]
+
+  if (!priceUnitEther) {
+    throw Error(`Price unit not configured for ${network.name}`)
+  }
+  const priceUnits = ethers.utils.parseEther(priceUnitEther)
+
+  const tx = await contract.initialize(priceUnits)
   await tx.wait()
   return contract
 }
