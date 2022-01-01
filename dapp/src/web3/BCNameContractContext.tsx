@@ -2,6 +2,7 @@ import { ethers } from 'ethers'
 import React, { useContext, useEffect, useState } from 'react'
 import { BCName } from '../types/BCName'
 import BCNameContract from './BCNameContract'
+import bcNameABI from './bc-name-abi.json'
 
 interface BCNameContractContextData {
   selectedAddress: string | undefined
@@ -70,7 +71,7 @@ export const BCNameProvider = ({
       console.error('Contract address is unset')
       return
     }
-    if (!process.env.NEXT_PUBLIC_CONTRACT_ABI) {
+    if (!bcNameABI?.length) {
       console.error('Contract ABI is unset')
       return
     }
@@ -81,7 +82,7 @@ export const BCNameProvider = ({
       new BCNameContract(
         new ethers.Contract(
           process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
-          process.env.NEXT_PUBLIC_CONTRACT_ABI,
+          bcNameABI,
           signer
         ) as BCName
       )
