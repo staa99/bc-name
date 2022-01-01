@@ -3,9 +3,9 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 contract BCName is Initializable {
-  uint256 priceUnit;
-  address owner;
-  uint256 totalNames;
+  uint256 private priceUnit;
+  address public owner;
+  uint256 public totalNames;
   mapping(string => address) private names;
   mapping(string => address) private transfers;
   mapping(address => AddressNames) private addressNames;
@@ -36,8 +36,8 @@ contract BCName is Initializable {
     if (names[name] == msg.sender) {
       return;
     }
-    require(names[name] == address(0), 'Name is already mapped to another address');
-    require(msg.value >= getLinkingPrice(name), 'Price requirements must be satisfied');
+    require(names[name] == address(0), "NAME_NOT_AVAILABLE");
+    require(msg.value >= getLinkingPrice(name), "REGISTRATION_FEES_REQUIRED");
 
     // set names
     names[name] = msg.sender;
@@ -52,7 +52,7 @@ contract BCName is Initializable {
   function release(string memory name)
   public
   {
-    require(names[name] == msg.sender, 'Invalid attempt to release unowned name');
+    require(names[name] == msg.sender, "PERMISSION_DENIED");
 
     names[name] = address(0);
     transfers[name] = address(0);
@@ -66,9 +66,9 @@ contract BCName is Initializable {
   function transfer(string memory name, address recipient)
   public payable
   {
-    require(names[name] == msg.sender, 'Invalid attempt to transfer unowned name');
-    require(recipient != msg.sender, 'Cannot transfer to same address');
-    require(msg.value >= getTransferPrice(name), 'Transfer fees must be added');
+    require(names[name] == msg.sender, "PERMISSION_DENIED");
+    require(recipient != msg.sender, "SAME_ADDRESS_TRANSFER_INVALID");
+    require(msg.value >= getTransferPrice(name), "TRANSFER_FEES_REQUIRED");
 
     transfers[name] = recipient;
     emit NameTransferInitiated(msg.sender, recipient, name);
@@ -77,7 +77,7 @@ contract BCName is Initializable {
   function claim(string memory name)
   public payable
   {
-    require(transfers[name] == msg.sender, 'Invalid attempt to claim an unowned transfer');
+    require(transfers[name] == msg.sender, "PERMISSION_DENIED");
 
     // Reduce the name count of the original owner
     address originalOwner = names[name];
@@ -99,7 +99,7 @@ contract BCName is Initializable {
       return 0;
     }
 
-    require(names[name] == address(0), 'Name is already mapped to another address');
+    require(names[name] == address(0), "NAME_NOT_AVAILABLE");
     return priceUnit * addressNames[msg.sender].length;
   }
 
@@ -108,7 +108,7 @@ contract BCName is Initializable {
   returns (uint256)
   {
     // validation
-    require(names[name] == msg.sender, 'Invalid attempt to transfer unowned name');
+    require(names[name] == msg.sender, "PERMISSION_DENIED");
     return priceUnit;
   }
 
@@ -136,10 +136,10 @@ contract BCName is Initializable {
   function withdraw(uint256 amount)
   public payable
   {
-    require(msg.sender == owner, 'Permission denied to withdraw');
-    require(address(this).balance >= amount, 'Contract balance too low');
+    require(msg.sender == owner, "WITHDRAWAL_PERMISSION_DENIED");
+    require(address(this).balance >= amount, "INSUFFICIENT_BALANCE");
 
-    (bool sent,) = msg.sender.call{value : amount}('');
-    require(sent, 'Failed to withdraw money from contract');
+    (bool sent,) = msg.sender.call{value : amount}("");
+    require(sent, "WITHDRAWAL_FAILED");
   }
 }
