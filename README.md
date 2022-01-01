@@ -1,6 +1,7 @@
 # BC Name
 
-An alternative to ENS without the domain names
+An alternative to ENS without the domain names. The contract ABI is made public in the dapp.
+The goal is to integrate with many projects to enable users to easily use names in place of ENS.
 
 ##Contract addresses
 
