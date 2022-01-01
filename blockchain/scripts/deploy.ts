@@ -1,13 +1,25 @@
-import { ethers, run, upgrades } from 'hardhat'
+import { ethers, network, run, upgrades } from 'hardhat'
 
 async function main() {
   await run('compile')
 
+  const priceUnitEtherKey = `${network.name.toUpperCase()}_NETWORK_PRICE_UNIT_ETHER`
+  const priceUnitEther = process.env[priceUnitEtherKey]
+
+  if (!priceUnitEther) {
+    throw Error(`Price unit not configured for ${network.name}`)
+  }
+  const priceUnits = ethers.utils.parseEther(priceUnitEther)
+
   // We get the contract to deploy
   const implementationFactory = await ethers.getContractFactory('BCName')
-  const contract = await upgrades.deployProxy(implementationFactory, {
-    initializer: 'initialize',
-  })
+  const contract = await upgrades.deployProxy(
+    implementationFactory,
+    [priceUnits],
+    {
+      initializer: 'initialize',
+    }
+  )
 
   await contract.deployed()
 

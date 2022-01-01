@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 contract BCName is Initializable {
-  uint256 constant priceUnit = 0.0001 ether;
+  uint256 priceUnit;
   address owner;
   uint256 totalNames;
   mapping(string => address) private names;
@@ -22,10 +22,11 @@ contract BCName is Initializable {
 
   constructor() payable {}
 
-  function initialize()
+  function initialize(uint256 _priceUnit)
   public initializer
   {
     owner = msg.sender;
+    priceUnit = _priceUnit;
   }
 
   function register(string memory name)

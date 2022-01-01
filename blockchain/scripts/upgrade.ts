@@ -1,16 +1,18 @@
-import { ethers, run, upgrades } from 'hardhat'
+import { ethers, run, upgrades, network } from 'hardhat'
 
 async function main() {
   await run('compile')
 
-  if (!process.env.CONTRACT_ADDRESS) {
+  const contractAddressEnvKey = `${network.name.toUpperCase()}_CONTRACT_ADDRESS`
+  const contractAddress = process.env[contractAddressEnvKey]
+  if (!contractAddress) {
     throw Error('Proxy contract address must be set to upgrade implementations')
   }
 
   // We get the contract to deploy
   const implementationFactory = await ethers.getContractFactory('BCName')
   const contract = await upgrades.upgradeProxy(
-    process.env.CONTRACT_ADDRESS,
+    contractAddress,
     implementationFactory
   )
 
