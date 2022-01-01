@@ -1,14 +1,15 @@
 import { Button, Center, Heading, Stack, Text, VStack } from '@chakra-ui/react'
-import { ethers } from 'ethers'
+import { BigNumberish } from 'ethers'
+import { formatPrice } from '../utils/format_utils'
 
 interface GetNameCardProps {
   name: string
-  price: number
+  price: BigNumberish
   linkName(): Promise<void>
 }
 
-const SearchResultCard = ({ name, price, linkName }: GetNameCardProps) => {
-  const formattedPrice = `${ethers.utils.formatEther(price)} ETH`
+const GetNameCard = ({ name, price, linkName }: GetNameCardProps) => {
+  const formattedPrice = formatPrice(price)
   return (
     <Center py={6} width={'100%'}>
       <VStack
@@ -60,4 +61,4 @@ const SearchResultCard = ({ name, price, linkName }: GetNameCardProps) => {
   )
 }
 
-export default SearchResultCard
+export default GetNameCard

@@ -12,7 +12,10 @@ import { ChangeEvent, useState } from 'react'
 import { isValidDPNameOrAddress } from '../utils/validation_utils'
 
 interface SearchBoxProps extends InputProps {
-  onSearchButtonClicked(terms: string): Promise<void>
+  onSearchButtonClicked(
+    terms: string,
+    setErrorMessage?: (err: string) => void
+  ): Promise<void>
   size?:
     | ThemeTypings['components']['Button']['sizes']
     | ThemeTypings['components']['Input']['sizes']
@@ -37,7 +40,7 @@ const SearchBox = ({
     }
 
     if (searchText) {
-      await onSearchButtonClicked(searchText)
+      await onSearchButtonClicked(searchText, setErrorMessage)
     }
   }
 
