@@ -39,6 +39,7 @@ const config: HardhatUserConfig = {
       url: process.env.BSC_MAINNET_URL || '',
       chainId: 56,
       accounts: accounts,
+      timeout: 1000000,
     },
   },
   gasReporter: {
