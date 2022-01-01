@@ -1,5 +1,7 @@
 # BC Name
 
+An alternative to ENS without the domain names
+
 ##Contract addresses
 
 ### BSC Mainnet
