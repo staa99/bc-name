@@ -1,7 +1,7 @@
 # BC Name
 
 An alternative to ENS without the domain names. The goal is to integrate
-with many projects to enable users to easily use names in place of ENS.
+with many projects to enable users to send tokens to BC names.
 
 ## Contract addresses
 
