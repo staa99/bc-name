@@ -1,10 +1,12 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract BCName is Initializable {
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+
+contract BCName is Initializable, OwnableUpgradeable, UUPSUpgradeable {
   uint256 private priceUnit;
-  address private owner;
   uint256 public totalNames;
   mapping(string => address) private names;
   mapping(string => address) private transfers;
@@ -20,12 +22,14 @@ contract BCName is Initializable {
     string[] allNamesEver;
   }
 
-  constructor() payable {}
+  /// @custom:oz-upgrades-unsafe-allow constructor
+  constructor() {
+    _disableInitializers();
+  }
 
-  function initialize(uint256 _priceUnit)
-  public initializer
-  {
-    owner = msg.sender;
+  function initialize(uint256 _priceUnit) initializer public {
+    __Ownable_init();
+    __UUPSUpgradeable_init();
     priceUnit = _priceUnit;
   }
 
@@ -134,12 +138,15 @@ contract BCName is Initializable {
   }
 
   function withdraw(uint256 amount)
-  public payable
+  public payable onlyOwner
   {
-    require(msg.sender == owner, "WITHDRAWAL_PERMISSION_DENIED");
     require(address(this).balance >= amount, "INSUFFICIENT_BALANCE");
 
     (bool sent,) = msg.sender.call{value : amount}("");
     require(sent, "WITHDRAWAL_FAILED");
   }
+
+  function _authorizeUpgrade(address newImplementation)
+  internal onlyOwner override
+  {}
 }

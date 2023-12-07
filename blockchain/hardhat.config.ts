@@ -7,6 +7,7 @@ import '@typechain/hardhat'
 import 'hardhat-gas-reporter'
 import 'solidity-coverage'
 import '@openzeppelin/hardhat-upgrades'
+import {utils} from 'ethers'
 
 dotenv.config()
 
@@ -40,6 +41,13 @@ const config: HardhatUserConfig = {
       chainId: 56,
       accounts: accounts,
       timeout: 1000000,
+    },
+    linea_testnet: {
+      url: process.env.LINEA_TESTNET_URL || '',
+      chainId: 59140,
+      accounts: accounts,
+      gasPrice: utils.parseUnits('2', 'gwei').toNumber(),
+      loggingEnabled: true,
     },
   },
   gasReporter: {
