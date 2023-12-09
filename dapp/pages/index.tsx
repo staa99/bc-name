@@ -11,7 +11,7 @@ const Home: NextPage = () => {
 
   const onSearch = async (
     terms: string,
-    setErrorMessage: (err: string) => void
+    setErrorMessage: (err: string) => void,
   ) => {
     if (!contract) {
       const accounts = await requestOrLoadAccounts()

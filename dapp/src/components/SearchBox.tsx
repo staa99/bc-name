@@ -4,21 +4,18 @@ import {
   FormErrorMessage,
   FormHelperText,
   Input,
+  InputGroup,
   InputProps,
   InputRightElement,
 } from '@chakra-ui/react'
-import { ThemeTypings } from '@chakra-ui/styled-system'
 import { ChangeEvent, useState } from 'react'
 import { isValidDPNameOrAddress } from '../utils/validation_utils'
 
 interface SearchBoxProps extends InputProps {
   onSearchButtonClicked(
     terms: string,
-    setErrorMessage?: (err: string) => void
+    setErrorMessage?: (err: string) => void,
   ): Promise<void>
-  size?:
-    | ThemeTypings['components']['Button']['sizes']
-    | ThemeTypings['components']['Input']['sizes']
   helperText?: string
 }
 
@@ -34,7 +31,7 @@ const SearchBox = ({
   const onButtonClick = async () => {
     if (!isValidDPNameOrAddress(searchText)) {
       setErrorMessage(
-        'Invalid DP name or address. DP names contain only alphanumeric characters separated by dots or dashes'
+        'Invalid DP name or address. DP names contain only alphanumeric characters separated by dots or dashes',
       )
       return
     }
@@ -51,12 +48,18 @@ const SearchBox = ({
 
   return (
     <FormControl isInvalid={!!errorMessage}>
-      <Input size={size} onChange={onSearchTextChanged} {...inputProps} />
-      <InputRightElement>
-        <Button onClick={onButtonClick} size={size}>
-          Search
-        </Button>
-      </InputRightElement>
+      <InputGroup size={size}>
+        <Input onChange={onSearchTextChanged} {...inputProps} />
+        <InputRightElement>
+          <Button
+            onClick={onButtonClick}
+            paddingX={'10px'}
+            width={'min-content'}
+          >
+            Search
+          </Button>
+        </InputRightElement>
+      </InputGroup>
       {!errorMessage ? (
         helperText && <FormHelperText>{helperText}</FormHelperText>
       ) : (

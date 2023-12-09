@@ -2,7 +2,7 @@ import { ethers } from 'ethers'
 
 const dpNameRegex = /^(?:[a-zA-Z0-9_]+[.-]?)*[a-zA-Z0-9_]+$/
 export const isValidDPNameOrAddress = (
-  text: string | null | undefined
+  text: string | null | undefined,
 ): boolean => {
   if (!text) return false
   if (ethers.utils.isAddress(text)) {

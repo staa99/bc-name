@@ -18,7 +18,7 @@ export default class BCNameContract {
   }
 
   async searchNamesOrAddresses(
-    nameOrAddress: string
+    nameOrAddress: string,
   ): Promise<SearchResult | undefined> {
     const ownedNames = []
     const allNamesEver = []

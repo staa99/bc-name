@@ -1,5 +1,5 @@
 import { Button, Center, Heading, Stack, Text, VStack } from '@chakra-ui/react'
-import { BigNumberish } from 'ethers'
+import { BigNumber, BigNumberish } from 'ethers'
 import { formatPrice } from '../utils/format_utils'
 
 interface GetNameCardProps {
@@ -23,7 +23,7 @@ const GetNameCard = ({ name, price, linkName }: GetNameCardProps) => {
           {name} is available
         </Heading>
         <Text fontWeight={600} color={'gray.500'} size="sm" mb={4}>
-          {price > 0
+          {BigNumber.from(price).gt(0)
             ? `Pay ${formattedPrice} to link your address`
             : 'Link your address for free'}
         </Text>

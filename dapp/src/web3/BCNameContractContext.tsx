@@ -83,9 +83,9 @@ export const BCNameProvider = ({
         new ethers.Contract(
           process.env.NEXT_PUBLIC_CONTRACT_ADDRESS,
           bcNameABI,
-          signer
-        ) as BCName
-      )
+          signer,
+        ) as BCName,
+      ),
     )
     console.log('contract address:', process.env.NEXT_PUBLIC_CONTRACT_ADDRESS)
     console.log('contract ABI:', process.env.NEXT_PUBLIC_CONTRACT_ABI)
